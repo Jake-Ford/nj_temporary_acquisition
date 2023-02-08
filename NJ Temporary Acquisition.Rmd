@@ -1,0 +1,90 @@
+---
+title: "NJ Temporary Acquisition"
+output: html_document
+date: "2023-02-08"
+---
+
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+
+#Load packages we'll need throughout the entire document
+library(readxl)
+library(sf)
+library(dplyr)
+library(janitor)
+library(dplyr)
+library(tidycensus)
+library(tidyverse)
+options(tigris_use_cache = TRUE)
+library(nngeo)
+library(leaflet)
+library(plotly)
+library(kableExtra)
+library(haven)
+library(rms)
+library(rmdformats)
+library(ggplot2)
+library(plotly)
+library(DT)
+library(ggmap)
+
+
+
+options(scipen = 100)
+
+
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+get_zips <- get_acs(
+  geography="zcta", 
+  state=c("NJ"),
+  variables=c("Total Households" = "S1901_C01_001E"),
+  year=2017, 
+  geometry=TRUE) %>%
+  select(GEOID, NAME, geometry)
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+muni_lines <- st_read("Municipal_Boundaries_of_NJ/Municipal_Boundaries_of_NJ.shp")
+
+muni_lines <- st_transform(muni_lines, st_crs(get_zips)) %>%
+  st_make_valid() 
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+leaflet() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  addPolygons(data=get_zips,
+              group= "Zips",
+              weight=2,
+              color='darkgreen',
+              fillOpacity=0,
+              dashArray = 3,
+              #stroke=1,
+              popup=paste("Zip Name: ", get_zips$NAME)) %>%
+  addPolygons(data = muni_lines,
+              group = "Muni Lines",
+              color= 'red',
+              fillOpacity=0,
+              dashArray = 4,
+              popup=paste("Muni Name", muni_lines$NAME)) %>%
+    addLayersControl(overlayGroups = c("Zips", "Muni Lines")) 
+
+
+```
+
+
+
+
+
+
+
+
+
+
